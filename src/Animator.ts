@@ -12,15 +12,16 @@ export default class Animator {
     let timePassed: number = 0;
 
     this.animateProxy = (timeStamp: number) => {
+      // console.log("proxi");
       counter++;
       secondsPassed = (timeStamp - oldTimeStamp) / 1000;
       oldTimeStamp = timeStamp;
       timePassed += secondsPassed;
 
-      this.entity.update();
-      if (counter < 100) {
-        this.enqueue();
-      }
+      this.entity.update(timePassed);
+      // if (counter < 2000) {
+      this.enqueue();
+      // }
     };
   }
   enqueue() {
