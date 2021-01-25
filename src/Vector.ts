@@ -5,4 +5,8 @@ export default class Vector {
     this.x = x;
     this.y = y;
   }
+  set(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
 }

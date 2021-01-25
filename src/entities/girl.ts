@@ -1,17 +1,20 @@
-import Vector from "./Vector";
-import { easeLinear } from "./easing";
-import { CANVAS_HEIGHT, CANVAS_WIDTH, DIRECTION } from "./constants";
+import State from "../EntityState";
+import Vector from "../Vector";
+import Entity from "../Entity";
+import { CANVAS_HEIGHT, CANVAS_WIDTH, DIRECTION } from "../constants";
+import { loadImage } from "../loaders";
+import { GIRL } from "../sprites/girl";
+
 const GRAVITY = 1;
 
-export default class Square {
-  private readonly context: CanvasRenderingContext2D;
-  private readonly width: number;
-  private readonly height: number;
-  position: Vector;
-  private velocity: Vector = {
-    x: 8,
-    y: 20
-  };
+export interface GirlParams {
+  width: number;
+  height: number;
+  state: State;
+}
+
+export default class Girl extends Entity {
+  private velocity: Vector = new Vector(8, 20);
   public direction: DIRECTION = DIRECTION.right;
   public moving: boolean = false;
   public jumping: boolean = false;
@@ -19,39 +22,20 @@ export default class Square {
   private jumpStartedTime: number = 0;
   private isJumping: boolean = false;
 
-  constructor(
-    context: CanvasRenderingContext2D,
-    width: number,
-    height: number
-  ) {
-    this.context = context;
-    this.width = width;
-    this.height = height;
-    this.position = {
-      x: 0,
-      y: 370
-    };
+  constructor({ width, height, state }: GirlParams) {
+    super({ width, height, state });
+    this.position.set(0, 170);
   }
 
-  draw() {
-    // Clear the canvas
-    this.context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-    // Fill with red
-    this.context.fillStyle = "#ff8080";
-
-    // Draw a rectangle on the canvas
-    this.context.fillRect(
-      this.position.x,
-      this.position.y,
-      this.width,
-      this.height
-    );
+  draw(context: CanvasRenderingContext2D) {
+    context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    this.state.drawState("base", context, this.position);
   }
 
-  update(timePassed: number) {
+  update(context: CanvasRenderingContext2D, timePassed: number) {
+    const draw = () => this.draw(context);
     if (!this.drawed) {
-      this.draw();
+      draw();
       this.drawed = true;
       return;
     }
@@ -76,18 +60,18 @@ export default class Square {
       }
       if (this.direction === DIRECTION.left) {
         if (this.position.x <= 0) {
-          this.draw();
+          draw();
           return;
         }
         this.position.x -= this.velocity.x;
       } else {
         if (this.position.x >= CANVAS_WIDTH - this.width) {
-          this.draw();
+          draw();
           return;
         }
         this.position.x += this.velocity.x;
       }
-      this.draw();
+      draw();
       return;
     } else {
       this.isJumping = false;
@@ -97,13 +81,13 @@ export default class Square {
     if (this.moving) {
       if (this.direction === DIRECTION.left) {
         if (this.position.x <= 0) {
-          this.draw();
+          draw();
           return;
         }
         this.position.x -= this.velocity.x;
       } else {
         if (this.position.x >= CANVAS_WIDTH - this.width) {
-          this.draw();
+          draw();
           return;
         }
         this.position.x += this.velocity.x;
@@ -116,6 +100,20 @@ export default class Square {
     // this.position.y += -this.velocity.y;
     // this.velocity.y -= GRAVITY;
     // console.log(this.position.x);
-    this.draw();
+    draw();
   }
+}
+
+export async function createGirl(): Promise<Girl> {
+  const image = await loadImage(GIRL.url);
+
+  const state = new State(image);
+  state.addState("base", GIRL.base);
+
+  const girl = new Girl({
+    width: GIRL.base.width,
+    height: GIRL.base.height,
+    state
+  });
+  return girl;
 }
