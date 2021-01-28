@@ -4,6 +4,7 @@ import Entity from "../Entity";
 import { CANVAS_HEIGHT, CANVAS_WIDTH, DIRECTION } from "../constants";
 import { loadImage } from "../loaders";
 import { GIRL } from "../sprites/girl";
+import { Move } from "../traits/move";
 
 const GRAVITY = 1;
 
@@ -14,20 +15,24 @@ export interface GirlParams {
 }
 
 export default class Girl extends Entity {
-  private velocity: Vector = new Vector(8, 20);
+  public velocity: Vector = new Vector(8, 20);
   public direction: DIRECTION = DIRECTION.right;
   public moving: boolean = false;
   public jumping: boolean = false;
   private drawed: boolean = false;
   private jumpStartedTime: number = 0;
   private isJumping: boolean = false;
+  public traits: Map<string, any> = new Map();
 
   constructor({ width, height, state }: GirlParams) {
     super({ width, height, state });
     this.position.set(0, 170);
+    const move = new Move();
+    this.traits.set("move", move);
   }
 
-  draw(context: CanvasRenderingContext2D) {
+  public draw(context: CanvasRenderingContext2D) {
+    console.log("draw", context);
     context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     this.state.drawState("base", context, this.position);
   }
@@ -79,36 +84,26 @@ export default class Girl extends Entity {
     }
 
     if (this.moving) {
-      if (this.direction === DIRECTION.left) {
-        if (this.position.x <= 0) {
-          draw();
-          return;
-        }
-        this.position.x -= this.velocity.x;
-      } else {
-        if (this.position.x >= CANVAS_WIDTH - this.width) {
-          draw();
-          return;
-        }
-        this.position.x += this.velocity.x;
-      }
-      // this.draw();
-      // return;
+      this.traits.get("move").start(this, context);
+      return;
     }
 
-    // this.position.x += this.velocity.x;
-    // this.position.y += -this.velocity.y;
-    // this.velocity.y -= GRAVITY;
-    // console.log(this.position.x);
     draw();
   }
+}
+
+enum GIRL_SPRITES_STATES {
+  base = "base",
+  left = "left",
+  right = "right"
 }
 
 export async function createGirl(): Promise<Girl> {
   const image = await loadImage(GIRL.url);
 
   const state = new State(image);
-  state.addState("base", GIRL.base);
+  state.addState(GIRL_SPRITES_STATES.base, GIRL.base);
+  state.addState(GIRL_SPRITES_STATES.left, GIRL.base);
 
   const girl = new Girl({
     width: GIRL.base.width,

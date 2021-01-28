@@ -8,5 +8,21 @@ export const GIRL = {
       x: 38,
       y: 205
     }
+  },
+  left: {
+    width: 115,
+    height: 230,
+    position: {
+      x: 235,
+      y: 205
+    }
+  },
+  right: {
+    width: 115,
+    height: 230,
+    position: {
+      x: 235,
+      y: 205
+    }
   }
 };

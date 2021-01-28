@@ -1,8 +1,9 @@
-import Square from "../Square";
+import Entity from "../Entity";
 import KeyboardController from "../KeyboardController";
 import { KEYS, DIRECTION, KEY_STATE } from "../constants";
+import Girl from "../entities/girl";
 
-export default function addKeyboardFunctionallity(square: Square) {
+export default function addKeyboardFunctionallity(square: Girl) {
   const keyboardController = new KeyboardController();
 
   keyboardController.listen();
